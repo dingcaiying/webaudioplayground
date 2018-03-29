@@ -16,18 +16,8 @@ module.exports = {
           exclude: /node_modules/,
         },
         {
-          test: /assets\/favicons/,
-          loader: 'file?name=assets/favicons/[name].[ext]',
-          exclude: /node_modules/,
-        },
-        {
-          test: /assets\/obj/,
-          loader: 'file?name=assets/obj/[name].[ext]',
-          exclude: /node_modules/,
-        },
-        {
-          test: /assets\/textures/,
-          loader: 'file?name=assets/textures/[name].[ext]',
+          test: /assets\/music/,
+          loader: 'file?name=assets/music/[name].[ext]',
           exclude: /node_modules/,
         },
         {
