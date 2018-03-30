@@ -1,7 +1,5 @@
 import './../scss/main.scss';
 import './../index.html';
-import 'three-extras/renderers/CanvasRenderer';
-import 'three-extras/renderers/Projector';
 import Sound from './Audio/Sound';
 
 // load assets
@@ -45,12 +43,10 @@ function initScene() {
   };
 
   for (let i = 0; i < freqByteData.length; i++) {
-    const material = new THREE.SpriteCanvasMaterial({
+    const material = new THREE.MeshBasicMaterial({
       color: Math.random() * 0x808008 + 0x808080,
-      program: program,
     });
-
-    particle = particles[i] = new THREE.Sprite(material);
+    particle = particles[i] = new THREE.Mesh(new THREE.CircleGeometry(5, 64 ), material);
 
     particle.position.x = Math.random() * 2000 - 1000;
     particle.position.y = Math.random() * 2000 - 1000;
@@ -58,7 +54,7 @@ function initScene() {
     scene.add(particle);
   }
 
-  renderer = new THREE.CanvasRenderer();
+  renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
@@ -70,7 +66,7 @@ function initSound() {
     sound = new Sound(audioCtx, buffer);
 
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
+    analyser.fftSize = 128;
     analyser.connect(audioCtx.destination);
 
     freqByteData = new Uint8Array(analyser.frequencyBinCount);
