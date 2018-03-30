@@ -10,7 +10,7 @@ requireAll(require.context('../assets/', true));
 
 
 let container, stats;
-let camera, scene, renderer, group, particle;
+let camera, scene, renderer, particles, particle, count = 0;
 let mouseX = 0, mouseY = 0;
 
 let windowHalfX = window.innerWidth / 2;
@@ -21,11 +21,12 @@ let analyser, freqByteData;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-init();
-bindEvent();
-// animate();
+initSound()
+  .then(initScene)
+  .then(bindEvent)
+  .then(animate);
 
-function init() {
+function initScene() {
   container = document.createElement('div');
   document.body.appendChild(container);
 
@@ -34,50 +35,76 @@ function init() {
 
   scene = new THREE.Scene();
 
+  particles = new Array();
+
   const PI2 = Math.PI * 2;
   const program = context => {
     context.beginPath();
-    context.arc(0, 0, 0.5, 0, PI2, true);
+    context.arc(0, 0, 10, 0, PI2, true);
     context.fill();
   };
 
-  group = new THREE.Group();
-  scene.add(group);
-
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < freqByteData.length; i++) {
     const material = new THREE.SpriteCanvasMaterial({
       color: Math.random() * 0x808008 + 0x808080,
       program: program,
     });
 
-    particle = new THREE.Sprite(material);
+    particle = particles[i] = new THREE.Sprite(material);
+
     particle.position.x = Math.random() * 2000 - 1000;
     particle.position.y = Math.random() * 2000 - 1000;
     particle.position.z = Math.random() * 2000 - 1000;
-    particle.scale.x = particle.scale.y = Math.random() * 20 + 10;
-    group.add(particle);
+    scene.add(particle);
   }
 
   renderer = new THREE.CanvasRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
+  return Promise.resolve();
+}
 
-  loadSound('/assets/music/example.mp3').then(buffer => {
+function initSound() {
+  return loadSound('/assets/music/example.mp3').then(buffer => {
     sound = new Sound(audioCtx, buffer);
-    analyser = audioCtx.createAnalyser();
-    sound.connectToNode(analyser);
 
-    analyser.fftSize = 128;
-    analyser.smoothingTimeConstant = 0.4;
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
     analyser.connect(audioCtx.destination);
 
-
     freqByteData = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(freqByteData);
-    console.log('freqByteData', freqByteData);
 
+    sound.setOutput(analyser);
+    sound.play();
   });
+}
+
+function render() {
+  count++;
+  camera.position.x += (mouseX - camera.position.x) * 0.05;
+  camera.position.y += (- mouseY - camera.position.y) * 0.05;
+  camera.lookAt(scene.position);
+  updateFFT();
+
+  let scaler;
+  for (let i = 0; i < freqByteData.length; i ++) {
+    particle = particles[i];
+    scaler = freqByteData[i] / 20 + 1;
+    particle.scale.x = particle.scale.y = scaler;
+    if (count % 100 > 0) console.log('scaler', scaler);
+  }
+
+  renderer.render(scene, camera);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  render();
+}
+
+function updateFFT() {
+  analyser.getByteFrequencyData(freqByteData);
 }
 
 function loadSound(url) {
@@ -95,24 +122,6 @@ function loadSound(url) {
     };
     request.send();
   });
-}
-
-function updateFFT() {}
-
-function render() {
-  camera.position.x += (mouseX - camera.position.x) * 0.05;
-  camera.position.y += (- mouseY - camera.position.y) * 0.05;
-  camera.lookAt(scene.position);
-
-  // group.rotation.x += 0.01;
-  // group.rotation.y += 0.02;
-
-  renderer.render(scene, camera);
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  render();
 }
 
 function bindEvent() {

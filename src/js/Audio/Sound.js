@@ -6,25 +6,25 @@ class Sound {
     this.context = context;
     this.buffer = buffer;
     this.source = null;
-    this.createSound();
+    this.gainNode = null;
+    this.destinationNode = context.destination;
   }
 
-  createSound() {
-    this.gainNode = this.context.createGain();
+  setup() {
     this.source = this.context.createBufferSource();
     this.source.buffer = this.buffer;
-    this.source.loop = true;
+    this.gainNode = this.context.createGain();
     this.source.connect(this.gainNode);
-    // this.gainNode.connect(this.context.destination);
   }
 
-  connectToNode(node) {
-    this.source.connect(node);
+  setOutput(node) {
+    this.destinationNode = node;
   }
 
   play() {
-    if (!this.source) this.createSound();
-    this.source.start(this.context.currentTime);
+    this.setup();
+    this.gainNode.connect(this.destinationNode);
+    this.source.start();
   }  
 
   stop() {
