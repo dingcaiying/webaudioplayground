@@ -6,6 +6,11 @@ import Sound from './Audio/Sound';
 function requireAll(r) { r.keys().forEach(r); }
 requireAll(require.context('../assets/', true));
 
+const musicUrls = [
+  '/assets/music/example.mp3',
+  '/assets/music/hero.mp3',
+  '/assets/music/you say run.mp3',
+];
 
 let container, stats;
 let camera, scene, renderer, particles, particle, count = 0;
@@ -13,6 +18,8 @@ let mouseX = 0, mouseY = 0;
 
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
+
+let raycaster, mouse;
 
 let sound;
 let analyser, freqByteData;
@@ -54,6 +61,10 @@ function initScene() {
     scene.add(particle);
   }
 
+  // intersection
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -61,8 +72,8 @@ function initScene() {
   return Promise.resolve();
 }
 
-function initSound() {
-  return loadSound('/assets/music/example.mp3').then(buffer => {
+function initSound(url = '/assets/music/example.mp3') {
+  return loadSound(url).then(buffer => {
     sound = new Sound(audioCtx, buffer);
 
     analyser = audioCtx.createAnalyser();
@@ -88,7 +99,7 @@ function render() {
     particle = particles[i];
     scaler = freqByteData[i] / 20 + 1;
     particle.scale.x = particle.scale.y = scaler;
-    if (count % 100 > 0) console.log('scaler', scaler);
+    // if (count % 100 > 0) console.log('scaler', scaler);
   }
 
   renderer.render(scene, camera);
@@ -97,6 +108,18 @@ function render() {
 function animate() {
   requestAnimationFrame(animate);
   render();
+}
+
+function onDocumentMouseDown(event) {
+  event.preventDefault();
+  mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+  mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(scene.children);
+  if (intersects.length) {
+    sound.stop();
+    initSound(musicUrls[1]);
+  }
 }
 
 function updateFFT() {
@@ -133,4 +156,7 @@ function bindEvent() {
       sound.stop();
     }
   });
+
+  // intersection
+  document.addEventListener('dblclick', onDocumentMouseDown, false);
 }
