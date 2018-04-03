@@ -8,8 +8,9 @@ requireAll(require.context('../assets/', true));
 
 const musicUrls = [
   './assets/music/example.mp3',
-  './assets/music/hero.mp3',
-  './assets/music/you say run.mp3',
+  './assets/music/35.2.7.mp3',
+  './assets/music/35.2.6.mp3',
+  './assets/music/35.1.8.mp3',
 ];
 
 let container, stats;
@@ -151,7 +152,7 @@ function onDocumentMouseDown(event) {
   var intersects = raycaster.intersectObjects(scene.children);
   if (intersects.length) {
     sound.stop();
-    initSound(musicUrls[1]);
+    initSound(musicUrls[Math.floor(randomNumberInRange(0, 4))]);
   }
 }
 
