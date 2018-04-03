@@ -27,6 +27,7 @@ let sound;
 let analyser, freqByteData;
 let panner;
 let rad = 0;
+let waveDataType = 'freq';
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -155,7 +156,11 @@ function onDocumentMouseDown(event) {
 }
 
 function updateFFT() {
-  analyser.getByteFrequencyData(freqByteData);
+  if (waveDataType === 'freq') {
+    analyser.getByteFrequencyData(freqByteData);
+  } else {
+    analyser.getByteTimeDomainData(freqByteData);
+  }
 }
 
 function loadSound(url) {
@@ -186,6 +191,13 @@ function bindEvent() {
     if (sound) {
       console.log('has sound and stop');
       sound.stop();
+    }
+  });
+  document.getElementById('btn_ft').addEventListener('click', () => {
+    if (sound) {
+      if (waveDataType === 'freq') waveDataType = 'time';
+      else waveDataType = 'freq';
+      console.log('switch freq / time, changed to ', waveDataType);
     }
   });
 
