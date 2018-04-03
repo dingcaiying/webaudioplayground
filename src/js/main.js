@@ -7,9 +7,9 @@ function requireAll(r) { r.keys().forEach(r); }
 requireAll(require.context('../assets/', true));
 
 const musicUrls = [
-  '/assets/music/example.mp3',
-  '/assets/music/hero.mp3',
-  '/assets/music/you say run.mp3',
+  './assets/music/example.mp3',
+  './assets/music/hero.mp3',
+  './assets/music/you say run.mp3',
 ];
 
 let container, stats;
@@ -90,7 +90,7 @@ function initScene() {
   return Promise.resolve();
 }
 
-function initSound(url = '/assets/music/example.mp3') {
+function initSound(url = './assets/music/example.mp3') {
   return loadSound(url).then(buffer => {
     sound = new Sound(audioCtx, buffer);
 
