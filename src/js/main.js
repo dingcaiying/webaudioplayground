@@ -7,8 +7,8 @@ function requireAll(r) { r.keys().forEach(r); }
 requireAll(require.context('../assets/', true));
 
 const musicUrls = [
-  './assets/music/example.mp3',
   './assets/music/35.2.7.mp3',
+  './assets/music/example.mp3',
   './assets/music/35.2.6.mp3',
   './assets/music/35.1.8.mp3',
 ];
@@ -91,7 +91,7 @@ function initScene() {
   return Promise.resolve();
 }
 
-function initSound(url = './assets/music/example.mp3') {
+function initSound(url = musicUrls[0]) {
   return loadSound(url).then(buffer => {
     sound = new Sound(audioCtx, buffer);
 
